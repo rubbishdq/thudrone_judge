@@ -43,6 +43,18 @@
 
 target_groundtruth_是一个长度为5的字符串。字符串每一位的取值为'e' 、'b'、'f' 、'v'之一，表示对应位置上的目标类型。
 
+judge.py还包含一系列可用的ROS服务，用于上位机图形化界面的开发。它们的列表如下：
+
+- `/get_detected_target` ：获取当前无人机目标识别的结果，返回值是一个长度为5的字符串。
+- `/get_ground_truth` ：获取目标识别结果的ground truth，（即target_groundtruth），返回值是一个长度为5的字符串。
+- `/get_score` ：获取当前比赛得分。
+- `/get_state` ：获取当前上位机状态，返回结果为字符串（如"IDLE"）。
+- `/get_time` ：获取当前比赛时间。
+- `/reset` ：用于重置上位机状态。
+- `/set_ground_truth` ：用于设置目标识别结果的ground truth。
+
+严禁比赛选手与上述服务交互，一经发现，以作弊论处。
+
 ## control.py
 
 control.py 是一个范例程序，模拟了无人机与上位机的交互流程。
