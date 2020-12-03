@@ -6,6 +6,7 @@ import time
 import os
 from enum import Enum
 from std_msgs.msg import Bool, String
+from thudrone_judge.srv import *
 
 
 class JudgeNode:
@@ -35,6 +36,14 @@ class JudgeNode:
         self.seenfireSub_ = rospy.Subscriber('/seenfire', Bool, self.seenfireCallback)
         self.targetresultSub_ = rospy.Subscriber('/target_result', String, self.targetresultCallback)
         self.doneSub_ = rospy.Subscriber('/done', Bool, self.doneCallback)
+
+        self.resetServer_ = rospy.Service('reset', Reset, self.resetCallback)
+        self.setgroundtruthServer_ = rospy.Service('set_ground_truth', SetGroundTruth, self.setgroundtruthCallback)
+        self.getstateServer_ = rospy.Service('get_state', GetState, self.getstateCallback)
+        self.getgroundtruthServer_ = rospy.Service('get_ground_truth', GetGroundTruth, self.getgroundtruthCallback)
+        self.getdetectedtargetServer_ = rospy.Service('get_detected_target', GetDetectedTarget, self.getdetectedtargetCallback)
+        self.getscoreServer_ = rospy.Service('get_score', GetScore, self.getscoreCallback)
+        self.gettimeServer_ = rospy.Service('get_time', GetTime, self.gettimeCallback)
 
         rate = rospy.Rate(40)
         while not rospy.is_shutdown():
@@ -169,6 +178,71 @@ class JudgeNode:
         self.fsm_state_ = self.FSMState.FINISHED
         self.score_ += 10.0
         self.time_end_ = time.time()
+        pass
+
+    def resetCallback(self, req):
+        self.time_begin_ = None
+        self.time_end_ = None
+        self.target_result_ = 'uuuuu'
+        self.score_ = 0.0
+        self.fsm_state_ = self.FSMState.IDLE
+
+        response = ResetResponse()
+        response.success = True
+        return response
+        pass
+
+    def setgroundtruthCallback(self, req):
+        self.target_groundtruth_ = req.groundtruth
+        response = SetGroundTruthResponse()
+        response.success = True
+        return response
+        pass
+
+    def getstateCallback(self, req):
+        response = GetStateResponse()
+        if self.fsm_state_ == self.FSMState.IDLE:
+            response.state = 'IDLE'
+        elif self.fsm_state_ == self.FSMState.TAKEOFF:
+            response.state = 'TAKEOFF'
+        elif self.fsm_state_ == self.FSMState.WAIT_DOOR:
+            response.state = 'WAIT_DOOR'
+        elif self.fsm_state_ == self.FSMState.DETECTING_TARGET:
+            response.state = 'DETECTING_TARGET'
+        elif self.fsm_state_ == self.FSMState.FINISHED:
+            response.state = 'FINISHED'
+        else:
+            response.state = ''
+        return response
+        pass
+
+    def getgroundtruthCallback(self, req):
+        response = GetGroundTruthResponse()
+        response.ground_truth = self.target_groundtruth_
+        return response
+        pass
+
+    def getdetectedtargetCallback(self, req):
+        response = GetDetectedTargetResponse()
+        response.detected_target = self.target_result_
+        return response
+        pass
+
+    def getscoreCallback(self, req):
+        response = GetScoreResponse()
+        response.score = self.score_
+        return response
+        pass
+
+    def gettimeCallback(self, req):
+        response = GetTimeResponse()
+        if self.time_begin_ is None:
+            response.time = 0.0
+        elif self.time_end_ is None:
+            response.time = time.time() - self.time_begin_
+        else:
+            response.time = self.time_end_ - self.time_begin_
+        return response
         pass
 
 

@@ -1,0 +1,3 @@
+string groundtruth  # 5-byte string
+---
+bool success
