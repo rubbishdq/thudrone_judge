@@ -29,6 +29,8 @@ class JudgeNode:
 
         self.score_ = 0.0
 
+        self.is_changed_ = [False, False, False, False, False]
+
         self.takeoffPub_ = rospy.Publisher('/takeoff', Bool, queue_size=100)
 
         self.readySub_ = rospy.Subscriber('/ready', Bool, self.readyCallback)
@@ -159,9 +161,12 @@ class JudgeNode:
         if not (t_type == 'e' or t_type == 'b' or t_type == 'f' or t_type == 'v'):
             return
         num = eval(num)
+        if self.is_changed_[num-1]:
+            return
         target_list = list(self.target_result_)
         target_list[num-1] = t_type
         self.target_result_ = ''.join(target_list)
+        self.is_changed_[num-1] = True
         pass
 
     def doneCallback(self, msg):
