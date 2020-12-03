@@ -36,12 +36,13 @@ class JudgeNode:
         self.targetresultSub_ = rospy.Subscriber('/target_result', String, self.targetresultCallback)
         self.doneSub_ = rospy.Subscriber('/done', Bool, self.doneCallback)
 
-        rate = rospy.Rate(40)
-        while not rospy.is_shutdown():
-            self.echoMessage()
-            rate.sleep()
+        self.echomessageTimer_ = rospy.Timer(rospy.Duration(0.037), self.echoMessage)
+        try:
+            rospy.spin()
+        except KeyboardInterrupt:
+            pass
 
-    def echoMessage(self):
+    def echoMessage(self, event):
         if self.fsm_state_ == self.FSMState.IDLE:
             os.system('clear')
             print('上位机状态: IDLE')
