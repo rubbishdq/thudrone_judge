@@ -237,7 +237,7 @@ class JudgeNode:
 
     def getscoreCallback(self, req):
         response = GetScoreResponse()
-        response.score = self.score_
+        response.score = self.score_ + self.getTargetScore()
         return response
         pass
 
